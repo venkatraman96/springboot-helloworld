@@ -32,7 +32,7 @@ try {
 					userRemoteConfigs: [[credentialsId: 'Jenkins', url: 'https://github.com/venkatraman96/springboot-helloworld.git']]
             ])
 	    echo "test"
-            echo "${env.GIT_COMMIT}"
+            echo "${GIT_COMMIT}"
             currentBuild.displayName = "#${env.GIT_COMMIT}"
         }
 
