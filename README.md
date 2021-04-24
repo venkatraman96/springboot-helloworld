@@ -7,7 +7,7 @@ A spring boot enabled hello world application
 [![Coverage Status](https://coveralls.io/repos/gazgeek/springboot-helloworld/badge.svg)](https://coveralls.io/r/gazgeek/springboot-helloworld)
 
 - Travis CI build and test
-- Continuous deployment to Heroku on success
+- Continuous deployment to Heroku on success   
 
 ## Usage
 
