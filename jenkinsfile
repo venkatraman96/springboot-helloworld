@@ -1,0 +1,157 @@
+#!/usr/bin/env groovy
+
+currentBuild.result = "SUCCESS"
+emailGroup = "m.venkatraman1996@gmail.com madurai.mvr@gmail.com"
+qaApprovers = ['vmuthukr']
+wasBuilt = false
+
+serviceName = 'SpringBoot'
+imageName = 'SpringBoot-service'
+libraryName = 'SpringBoot-service'
+sonarProjectName = 'SpringBoot-framework'
+contractReportFiles = 'SpringBoot-service.log'
+version = 'main'
+
+orgProvisioningStubVersion = version+'_latest'
+metadataStubVersion = version+'_latest'
+icsStubVersion = version+'_latest'
+
+unstableRegistry = 'docker-dev.artifacts.cloudtrust.rocks'
+evolvingRegistry = 'docker.artifacts.cloudtrust.rocks'
+stableRegistry = 'docker-stable.artifacts.cloudtrust.rocks'
+
+try {
+    node {
+        stage('CHECKOUT') {
+            checkout([
+                    $class: 'GitSCM', 
+					branches: [[name: '*/master']], 
+					doGenerateSubmoduleConfigurations: false, 
+					extensions: [[$class: 'CleanCheckout']], 
+					submoduleCfg: [], 
+					userRemoteConfigs: [[credentialsId: '<gitCredentials>', url: '<gitRepoURL>']]
+            ])
+            echo "${env.GIT_COMMIT}"
+            currentBuild.displayName = "#${env.GIT_COMMIT}"
+        }
+
+        changeList = env.GIT_COMMIT
+        devTag = "${version}_dev_${changeList}"
+        devCompleteTag = "${version}_dev_complete_${changeList}"
+        integrationReadyTag = "${version}_intg_ready_${changeList}"
+        latestStubTag = "${version}_latest"
+
+        stage('BUILD') {
+            withEnv(["JAVA_HOME=${tool 'jdk-1.8.0_64bits'}",
+                     "DOCKER_REGISTRY=${unstableRegistry}",
+                     "CHANGE_LIST=${changeList}",
+                     "DOCKER_TAG=${devTag}",
+                     "IMAGE_NAME=${imageName}",
+                     "PATH+DOCKER=${tool 'docker-latest'}/bin",
+                     "PATH+MAVEN=${env.JAVA_HOME}/bin",
+                     "VAULT_TOKEN=${workspace}/misc/token"]) {
+                     
+                    sh "mvn --batch-mode -V -U -e clean install -Pcoverage -Dbuild.number=${changeList} -Dsurefire.useFile=false"
+                    sh "mvn --batch-mode -V -U -e sonar:sonar -Pcoverage"
+					
+					sh "cp ./service/target/${libraryName}.jar ./${libraryName}.jar"
+
+                    sh 'docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG .'
+                    sh 'docker push $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG'
+
+
+                step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
+                step([$class: 'hudson.plugins.checkstyle.CheckStylePublisher', checkstyle: '**/target/checkstyle-result.xml'])
+                step([$class: 'hudson.plugins.findbugs.FindBugsPublisher'])
+                step([$class: 'hudson.plugins.pmd.PmdPublisher', checkstyle: '**/target/pmd.xml'])
+//                step([$class: 'JacocoPublisher'])
+//                step([$class       : 'InfluxDbPublisher',
+//                      customData   : null,
+//                      customDataMap: null,
+//                      customPrefix : null,
+//                      target       : 'MDM influxDB'])
+//
+            }
+        }
+    }
+	
+	wasBuilt = true
+	emailext (
+            to: emailGroup,
+            subject: "${serviceName} service '${version}' build for CL# ${changeList} passed automation tests",
+            mimeType: 'text/html',
+            body: """
+                    <p>${serviceName} service '${version}' build for CL# ${changeList} passed automation tests</p>
+                    <p>Check console output at <a href='${env.BUILD_URL}'>${env.JOB_NAME} [${changeList}]</a></p>
+                    <br/>
+                    \${JELLY_SCRIPT, template = \"html\"}
+                """,
+            recipientProviders: [[$class: 'CulpritsRecipientProvider']]
+	)
+
+
+    stage('QA') {
+        timeout(time: 14, unit: 'DAYS') {
+            waitUntil {
+                userInput = input(id: 'approve', message: "Approve CL#${changeList}?", submitterParameter: 'submitter', parameters: [
+                        [$class: 'TextParameterDefinition', defaultValue: '', name: 'comment', description: 'Optional comment']
+                ])
+
+                if (!(userInput['submitter'] in qaApprovers)) {
+                    echo "${userInput.submitter} is not allowed to approve project"
+                    return false
+                } else {
+                    echo "${userInput.submitter} approved project"
+                    echo "Comment: ${userInput.comment}"
+                    return true
+                }
+            }
+        }
+        echo "${userInput.submitter} approved project"
+        echo "Comment: ${userInput.comment}"
+
+        node {
+            withEnv(["DOCKER_REGISTRY=${evolvingRegistry}",
+                     "CHANGE_LIST=${changeList}",
+                     "DEV_COMPLETE_DOCKER_TAG=${devCompleteTag}",
+                     "IMAGE_NAME=${imageName}",
+                     "INTEGRATION_READY_TAG=${integrationReadyTag}",
+                     "PATH+DOCKER=${tool 'docker-latest'}/bin"]) {
+                sh 'docker pull $DOCKER_REGISTRY/$IMAGE_NAME:$DEV_COMPLETE_DOCKER_TAG'
+
+                sh 'docker tag $DOCKER_REGISTRY/$IMAGE_NAME:$DEV_COMPLETE_DOCKER_TAG $DOCKER_REGISTRY/$IMAGE_NAME:$INTEGRATION_READY_TAG'
+                sh 'docker push $DOCKER_REGISTRY/$IMAGE_NAME:$INTEGRATION_READY_TAG'
+
+                emailext (
+                        to: emailGroup,
+                        subject: "${serviceName} service '${version}' build for CL# ${changeList} with tag ${INTEGRATION_READY_TAG} is ready for integration",
+                        mimeType: 'text/html',
+                        body: """
+                    ${serviceName} service '${version}' build for CL# ${changeList} with tag ${INTEGRATION_READY_TAG} is ready for integration
+                """
+                )
+            }
+        }
+    }
+
+
+} catch (err) {
+    currentBuild.result = "FAILURE"
+    if (!wasBuilt) {
+        emailext (
+                to: emailGroup,
+                subject: "${serviceName} service '${version}' build for CL# ${changeList} FAILED",
+                mimeType: 'text/html',
+                attachLog: true,
+                body: """
+                    <p>${serviceName} service '${version}' build for CL# ${changeList} FAILED:</p>
+                    <p>Check console output at <a href='${env.BUILD_URL}'>${env.JOB_NAME} [${changeList}]</a></p>
+                    <br/>
+                    \${JELLY_SCRIPT,template=\"html\"}
+                """,
+                recipientProviders: [[$class: 'CulpritsRecipientProvider']]
+        )
+
+        throw err
+    }
+}
