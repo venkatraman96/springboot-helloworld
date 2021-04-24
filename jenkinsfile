@@ -19,6 +19,7 @@ icsStubVersion = version+'_latest'
 unstableRegistry = 'docker-dev.artifacts.cloudtrust.rocks'
 evolvingRegistry = 'docker.artifacts.cloudtrust.rocks'
 stableRegistry = 'docker-stable.artifacts.cloudtrust.rocks'
+def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 
 try {
     node {
@@ -32,7 +33,7 @@ try {
 					userRemoteConfigs: [[credentialsId: 'Jenkins', url: 'https://github.com/venkatraman96/springboot-helloworld.git']]
             ])
 	    echo "test"
-            echo "${env.GIT_COMMIT}"
+            echo "${gitCommit}"
             currentBuild.displayName = "#${env.GIT_COMMIT}"
         }
 
