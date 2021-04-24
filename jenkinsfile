@@ -29,7 +29,7 @@ try {
 					doGenerateSubmoduleConfigurations: false, 
 					extensions: [[$class: 'CleanCheckout']], 
 					submoduleCfg: [], 
-					userRemoteConfigs: [[credentialsId: 'jenkins', url: 'https://github.com/venkatraman96/springboot-helloworld.git']]
+					userRemoteConfigs: [[credentialsId: 'Jenkins', url: 'https://github.com/venkatraman96/springboot-helloworld.git']]
             ])
             echo "${env.GIT_COMMIT}"
             currentBuild.displayName = "#${env.GIT_COMMIT}"
