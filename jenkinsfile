@@ -37,9 +37,6 @@ try {
             echo "${gitCommit}"
             currentBuild.displayName = "#${env.GIT_COMMIT}"
         }
-         if (env.GIT_COMMIT == null) {
-    		env.GIT_COMMIT = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
-  	}
         changeList = env.GIT_COMMIT
         devTag = "${version}_dev_${changeList}"
         devCompleteTag = "${version}_dev_complete_${changeList}"
