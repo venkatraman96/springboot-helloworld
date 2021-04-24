@@ -19,10 +19,11 @@ icsStubVersion = version+'_latest'
 unstableRegistry = 'docker-dev.artifacts.cloudtrust.rocks'
 evolvingRegistry = 'docker.artifacts.cloudtrust.rocks'
 stableRegistry = 'docker-stable.artifacts.cloudtrust.rocks'
-def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 
 try {
     node {
+	def branch = env.BRANCH_NAME
+   	sh "My branch name: ${branch}"
         stage('CHECKOUT') {
             checkout([
                     $class: 'GitSCM', 
