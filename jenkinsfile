@@ -16,7 +16,7 @@ pipeline {
                     echo 'Pulling...' + env.BRANCH_NAME
                     //echo 'java...' +env.JAVA_HOME
                     //echo 'mvn...' +env.MAVEN_HOME
-                    def mvnHome = tool 'Maven 3.6.3'
+                    def mvnHome = tool 'M3'
                     echo 'mvn home...' +${mvnHome}
                     if (isUnix()) {
                         def targetVersion = getDevVersion()
