@@ -19,10 +19,10 @@ pipeline {
                     def mvnHome = tool 'Maven'
                     sh "'${mvnHome}/bin/mvn' --version"
                     echo 'mvn home...' +${mvnHome}
-                    if (isUnix()) {
+                    //if (isUnix()) {
                         def targetVersion = getDevVersion()
-                        print 'target build version...'
-                        print targetVersion
+                        //print 'target build version...'
+                        //print targetVersion
                         sh "'${mvnHome}/bin/mvn' -Dintegration-tests.skip=true -Dbuild.number=${targetVersion} clean package"
                         def pom = readMavenPom file: 'pom.xml'
                         // get the current development version
@@ -31,13 +31,13 @@ pipeline {
                         // execute the unit testing and collect the reports
                         junit '**//*target/surefire-reports/TEST-*.xml'
                         archive 'target*//*.jar'
-                    } else {
-                        bat(/"${mvnHome}\bin\mvn" -Dintegration-tests.skip=true clean package/)
-                        def pom = readMavenPom file: 'pom.xml'
-                        print pom.version
-                        junit '**//*target/surefire-reports/TEST-*.xml'
-                        archive 'target*//*.jar'
-                    }
+                    //} else {
+                       // bat(/"${mvnHome}\bin\mvn" -Dintegration-tests.skip=true clean package/)
+                        //def pom = readMavenPom file: 'pom.xml'
+                        //print pom.version
+                        //junit '**//*target/surefire-reports/TEST-*.xml'
+                        //archive 'target*//*.jar'
+                    //}
                 }
 
             }
