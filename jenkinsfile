@@ -5,7 +5,7 @@ pipeline {
         EMAIL_RECIPIENTS = 'madurai.mvr@gmail.com'
     }
      tools {
-    maven 'M3'
+    maven 'Maven'
   }
     stages {
 
@@ -19,7 +19,7 @@ pipeline {
                     echo 'Pulling...' + env.BRANCH_NAME
                     //echo 'java...' +env.JAVA_HOME
                     //echo 'mvn...' +env.MAVEN_HOME
-                    def mvnHome = tool 'M3'
+                    def mvnHome = tool 'Maven'
                     echo 'mvn home...' +${mvnHome}
                     if (isUnix()) {
                         def targetVersion = getDevVersion()
