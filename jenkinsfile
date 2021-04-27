@@ -17,6 +17,7 @@ pipeline {
                     //echo 'java...' +env.JAVA_HOME
                     //echo 'mvn...' +env.MAVEN_HOME
                     def mvnHome = tool 'Maven'
+                    sh "'${mvnHome}/bin/mvn' --version"
                     echo 'mvn home...' +${mvnHome}
                     if (isUnix()) {
                         def targetVersion = getDevVersion()
