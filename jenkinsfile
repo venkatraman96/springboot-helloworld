@@ -32,13 +32,13 @@ pipeline {
                         print pom.version
                         echo 'execute the unit testing and collect the reports'
                         // execute the unit testing and collect the reports
-                        junit '**//*target/surefire-reports/TEST-*.xml'
+                        junit allowEmptyResults: true, '**//*target/surefire-reports/TEST-*.xml'
                         archive 'target*//*.jar'
                     } else {
                         bat(/"${mvnHome}\bin\mvn" -Dintegration-tests.skip=true -Dmaven.test.skip=true clean package  --batch-mode/)
                         def pom = readMavenPom file: 'pom.xml'
                         print pom.version
-                        junit '**//*target/surefire-reports/TEST-*.xml'
+                        junit allowEmptyResults: true, '**//*target/surefire-reports/TEST-*.xml'
                         archive 'target*//*.jar'
                     }
                 }
