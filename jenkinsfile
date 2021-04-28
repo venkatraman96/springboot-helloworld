@@ -23,7 +23,7 @@ pipeline {
                         def targetVersion = getDevVersion()
                         print 'target build version...'
                         print targetVersion
-                        sh "'${mvnHome}/bin/mvn' -Dintegration-tests.skip=true -Dbuild.number=${targetVersion} clean package --batch-mode"
+                        sh "'${mvnHome}/bin/mvn' -Dintegration-tests.skip=true -Dmaven.test.skip=true -Dbuild.number=${targetVersion} clean package --batch-mode"
                         def pom = readMavenPom file: 'pom.xml'
                         // get the current development version 
                         developmentArtifactVersion = "${pom.version}-${targetVersion}"
@@ -32,7 +32,7 @@ pipeline {
                         junit '**//*target/surefire-reports/TEST-*.xml'
                         archive 'target*//*.jar'
                     } else {
-                        bat(/"${mvnHome}\bin\mvn" -Dintegration-tests.skip=true clean package/)
+                        bat(/"${mvnHome}\bin\mvn" -Dintegration-tests.skip=true -Dmaven.test.skip=true clean package  --batch-mode/)
                         def pom = readMavenPom file: 'pom.xml'
                         print pom.version
                         junit '**//*target/surefire-reports/TEST-*.xml'
