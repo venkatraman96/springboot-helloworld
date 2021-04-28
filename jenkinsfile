@@ -18,12 +18,12 @@ pipeline {
                     //echo 'mvn...' +env.MAVEN_HOME
                     def mvnHome = tool 'Maven'
                     sh "'${mvnHome}/bin/mvn' --version"
-                    echo 'mvn home...' +${mvnHome}
+                    sh  "'mvn home...' +${mvnHome}"
                     //if (isUnix()) {
                         def targetVersion = getDevVersion()
-                        print 'target build version...'
+                        //print 'target build version...'
                         //print targetVersion
-                        echo ${targetVersion}
+                        sh "${targetVersion}"
                         sh "'${mvnHome}/bin/mvn' -Dintegration-tests.skip=true -Dbuild.number=${targetVersion} clean package"
                         def pom = readMavenPom file: 'pom.xml'
                         // get the current development version
