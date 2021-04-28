@@ -23,7 +23,7 @@ pipeline {
                         def targetVersion = getDevVersion()
                         print 'target build version...'
                         print targetVersion
-                        sh "'${mvnHome}/bin/mvn' -Dintegration-tests.skip=true -Dbuild.number=${targetVersion} clean package"
+                        sh "'${mvnHome}/bin/mvn' -Dintegration-tests.skip=true -Dbuild.number=${targetVersion} clean package --batch-mode"
                         def pom = readMavenPom file: 'pom.xml'
                         // get the current development version 
                         developmentArtifactVersion = "${pom.version}-${targetVersion}"
@@ -49,9 +49,9 @@ pipeline {
                     def mvnHome = tool 'Maven 3.5.2'
                     if (isUnix()) {
                         // just to trigger the integration test without unit testing
-                        sh "'${mvnHome}/bin/mvn'  verify -Dunit-tests.skip=true"
+                        sh "'${mvnHome}/bin/mvn'  verify -Dunit-tests.skip=true --batch-mode"
                     } else {
-                        bat(/"${mvnHome}\bin\mvn" verify -Dunit-tests.skip=true/)
+                        bat(/"${mvnHome}\bin\mvn" verify -Dunit-tests.skip=true --batch-mode/)
                     }
 
                 }
@@ -66,7 +66,7 @@ pipeline {
                     def mvnHome = tool 'Maven 3.5.2'
                     withSonarQubeEnv {
 
-                        sh "'${mvnHome}/bin/mvn'  verify sonar:sonar -Dintegration-tests.skip=true -Dmaven.test.failure.ignore=true"
+                        sh "'${mvnHome}/bin/mvn'  verify sonar:sonar -Dintegration-tests.skip=true -Dmaven.test.failure.ignore=true --batch-mode"
                     }
                 }
             }
@@ -123,7 +123,7 @@ pipeline {
                             script {
                                 def mvnHome = tool 'Maven 3.5.2'
                                 //NOTE : if u change the sanity test class name , change it here as well
-                                sh "'${mvnHome}/bin/mvn' -Dtest=ApplicationSanityCheck_ITT surefire:test"
+                                sh "'${mvnHome}/bin/mvn' -Dtest=ApplicationSanityCheck_ITT surefire:test --batch-mode"
                             }
 
                         }
@@ -321,7 +321,7 @@ def getReleaseVersion() {
                                def mvnHome = tool 'Maven 3.5.2'
                                withSonarQubeEnv {
                                    // sh "'${mvnHome}/bin/mvn'  verify sonar:sonar -Dsonar.host.url=http://bicsjava.bc/sonar/ -Dmaven.test.failure.ignore=true"
-                                   sh "'${mvnHome}/bin/mvn'  verify sonar:sonar -Dmaven.test.failure.ignore=true"
+                                   sh "'${mvnHome}/bin/mvn'  verify sonar:sonar -Dmaven.test.failure.ignore=true --batch-mode"
                                }
                            }
                        },
