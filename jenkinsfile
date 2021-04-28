@@ -24,6 +24,7 @@ pipeline {
                         print 'target build version...'
                         print targetVersion
                         sh "'${mvnHome}/bin/mvn' -Dintegration-tests.skip=true -Dmaven.test.skip=true -Dbuild.number=${targetVersion} clean package --batch-mode"
+                        echo 'maven build sucess...'
                         def pom = readMavenPom file: 'pom.xml'
                         // get the current development version 
                         developmentArtifactVersion = "${pom.version}-${targetVersion}"
