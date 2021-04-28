@@ -26,9 +26,11 @@ pipeline {
                         sh "'${mvnHome}/bin/mvn' -Dintegration-tests.skip=true -Dmaven.test.skip=true -Dbuild.number=${targetVersion} clean package --batch-mode"
                         echo 'maven build sucess...'
                         def pom = readMavenPom file: 'pom.xml'
+                        echo 'get the current development version'
                         // get the current development version 
                         developmentArtifactVersion = "${pom.version}-${targetVersion}"
                         print pom.version
+                        echo 'execute the unit testing and collect the reports'
                         // execute the unit testing and collect the reports
                         junit '**//*target/surefire-reports/TEST-*.xml'
                         archive 'target*//*.jar'
