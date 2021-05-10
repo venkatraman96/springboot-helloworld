@@ -13,28 +13,17 @@ pipeline {
 			script {
 				echo 'Pulling...' + env.BRANCH_NAME
 				def changeList = getDevVersion()
-				devTag = "${version}_dev_${changeList}"
-				devCompleteTag = "${version}_dev_complete_${changeList}"
-				integrationReadyTag = "${version}_intg_ready_${changeList}"
-				latestStubTag = "${version}_latest"
+				devTag = "dev_${changeList}"
 				def mvnHome = tool 'Maven'
 				sh "'${mvnHome}/bin/mvn' --version"
 			}
 		}
 		stage('BUILD') {
             withEnv(["JAVA_HOME=${tool 'java'}",
-                     "DOCKER_REGISTRY=${unstableRegistry}",
                      "CHANGE_LIST=${changeList}",
-                     "DOCKER_TAG=${devTag}",
-                     "IMAGE_NAME=${imageName}",
-                     "PATH+DOCKER=${tool 'docker-latest'}/bin",
-                     "PATH+MAVEN=${env.JAVA_HOME}/bin",
-                     "VAULT_TOKEN=${workspace}/misc/token"]) {
+                     "PATH+MAVEN=${env.JAVA_HOME}/bin"]) {
                      
                     sh "mvn --batch-mode -V -U -e clean install -Pcoverage -Dbuild.number=${changeList} -Dsurefire.useFile=false"
-                    sh "mvn --batch-mode -V -U -e sonar:sonar -Pcoverage"
-					
-					sh "cp ./service/target/${libraryName}.jar ./${libraryName}.jar"
 
             }
         }
