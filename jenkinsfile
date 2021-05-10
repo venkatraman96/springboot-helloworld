@@ -36,21 +36,6 @@ pipeline {
 					
 					sh "cp ./service/target/${libraryName}.jar ./${libraryName}.jar"
 
-                    sh 'docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG .'
-                    sh 'docker push $DOCKER_REGISTRY/$IMAGE_NAME:$DOCKER_TAG'
-
-
-                step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
-                step([$class: 'hudson.plugins.checkstyle.CheckStylePublisher', checkstyle: '**/target/checkstyle-result.xml'])
-                step([$class: 'hudson.plugins.findbugs.FindBugsPublisher'])
-                step([$class: 'hudson.plugins.pmd.PmdPublisher', checkstyle: '**/target/pmd.xml'])
-//                step([$class: 'JacocoPublisher'])
-//                step([$class       : 'InfluxDbPublisher',
-//                      customData   : null,
-//                      customDataMap: null,
-//                      customPrefix : null,
-//                      target       : 'MDM influxDB'])
-//
             }
         }
 	}
