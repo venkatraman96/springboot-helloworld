@@ -1,6 +1,6 @@
 version = env.BRANCH_NAME
-unstableRegistry = 'mdm-docker-dev.artifacts.cloudtrust.rocks'
-stableRegistry = 'mdm-docker-stable.artifacts.cloudtrust.rocks'
+unstableRegistry = 'test-nightly'
+stableRegistry = 'snapshot'
 
 pipeline {
     agent any
