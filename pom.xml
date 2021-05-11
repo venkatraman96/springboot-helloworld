@@ -64,7 +64,7 @@
     <distributionManagement>
 		<repository>
 			<id>mdm.maven.repo</id>
-			<name>MDM Maven Repository</name>
+			<name>Maven Repository</name>
 			<url>http://bizbrains.pagekite.me/snapshots</url>
 		</repository>
 	</distributionManagement>
